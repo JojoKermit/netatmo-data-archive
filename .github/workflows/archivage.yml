@@ -25,8 +25,7 @@ jobs:
         env:
           NETATMO_CLIENT_ID: ${{ secrets.NETATMO_CLIENT_ID }}
           NETATMO_CLIENT_SECRET: ${{ secrets.NETATMO_CLIENT_SECRET }}
-          NETATMO_USERNAME: ${{ secrets.NETATMO_USERNAME }}
-          NETATMO_PASSWORD: ${{ secrets.NETATMO_PASSWORD }}
+          NETATMO_REFRESH_TOKEN: ${{ secrets.NETATMO_REFRESH_TOKEN }}
 
       - name: Sauvegarder les données sur GitHub
         run: |

@@ -10,11 +10,10 @@ async function archiverDonnees() {
     try {
         // 1. Authentification
         const authParams = new URLSearchParams({
-            grant_type: 'password',
+            grant_type: 'refresh_token',
             client_id: process.env.NETATMO_CLIENT_ID,
             client_secret: process.env.NETATMO_CLIENT_SECRET,
-            username: process.env.NETATMO_USERNAME,
-            password: process.env.NETATMO_PASSWORD
+            refresh_token: process.env.NETATMO_REFRESH_TOKEN
         });
 
         const authRes = await axios.post('https://api.netatmo.com/oauth2/token', authParams);
