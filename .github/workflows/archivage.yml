@@ -1,0 +1,37 @@
+name: Archivage Données Netatmo
+on:
+  schedule:
+    - cron: '45 * * * *' # S'exécute à chaque heure, minute 45
+  workflow_dispatch:      # Permet de le lancer manuellement pour tester
+
+jobs:
+  archive:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write     # Crucial pour que le robot puisse modifier le CSV
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Installer Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Installer les dépendances
+        run: npm install axios
+
+      - name: Lancer l'extraction et l'archivage
+        run: node archive_meteo.js
+        env:
+          NETATMO_CLIENT_ID: ${{ secrets.NETATMO_CLIENT_ID }}
+          NETATMO_CLIENT_SECRET: ${{ secrets.NETATMO_CLIENT_SECRET }}
+          NETATMO_USERNAME: ${{ secrets.NETATMO_USERNAME }}
+          NETATMO_PASSWORD: ${{ secrets.NETATMO_PASSWORD }}
+
+      - name: Sauvegarder les données sur GitHub
+        run: |
+          git config --global user.name "GitHub Action Bot"
+          git config --global user.email "action@github.com"
+          git add historique.csv
+          git commit -m "Auto-update : Varanges & Genlis [skip ci]" || echo "Rien à ajouter"
+          git push
