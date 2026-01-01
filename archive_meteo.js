@@ -19,13 +19,16 @@ async function archiverDonnees() {
         const authRes = await axios.post('https://api.netatmo.com/oauth2/token', authParams);
         const token = authRes.data.access_token;
 
-        // 2. Récupération (Zone large couvrant les deux villes)
+        // 2. Récupération des données (Zone légèrement élargie)
         const res = await axios.get('https://api.netatmo.com/api/getpublicdata', {
-            params: { lat_ne: 47.26, lon_ne: 5.23, lat_sw: 47.20, lon_sw: 5.17 },
+            params: {
+                lat_ne: 47.30, lon_ne: 5.30,
+                lat_sw: 47.15, lon_sw: 5.10
+            },
             headers: { 'Authorization': `Bearer ${token}` }
         });
 
-        const toutesLesStations = res.data.body;
+        const toutesLesStations = res.data.body || [];
         const maintenant = new Date();
         const dateLoc = maintenant.toLocaleDateString('fr-FR');
         const heureLoc = maintenant.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
@@ -36,11 +39,17 @@ async function archiverDonnees() {
             if (dataStation) {
                 let temp = "N/A", hum = "N/A", pluie_1h = 0, pluie_24h = 0;
 
-                // Temp/Hum
+                // Sécurité pour la lecture des mesures
                 if (dataStation.measures) {
-                    const ts = Object.keys(dataStation.measures)[0];
-                    const v = dataStation.measures[ts].res[ts];
-                    temp = v[0]; hum = v[1];
+                    const firstTs = Object.keys(dataStation.measures)[0];
+                    if (firstTs && dataStation.measures[firstTs].res) {
+                        const resKey = Object.keys(dataStation.measures[firstTs].res)[0];
+                        const values = dataStation.measures[firstTs].res[resKey];
+                        if (values) {
+                            temp = values[0] !== undefined ? values[0] : "N/A";
+                            hum = values[1] !== undefined ? values[1] : "N/A";
+                        }
+                    }
                 }
 
                 // Pluie
@@ -55,7 +64,9 @@ async function archiverDonnees() {
 
                 const ligne = `${dateLoc};${heureLoc};${cible.nom};${temp};${hum};${pluie_1h};${pluie_24h}\n`;
                 fs.appendFileSync('historique.csv', ligne);
-                console.log(`✅ ${cible.nom} archivé.`);
+                console.log(`✅ ${cible.nom} traité (${temp}°C)`);
+            } else {
+                console.log(`⚠️ Station ${cible.nom} non trouvée dans la zone actuelle.`);
             }
         });
 
