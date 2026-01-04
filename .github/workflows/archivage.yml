@@ -1,14 +1,14 @@
 name: Archivage Données Netatmo
 on:
   schedule:
-    - cron: '*/15 * * * *' # S'exécute à chaque heure, minute 45
-  workflow_dispatch:      # Permet de le lancer manuellement pour tester
+    - cron: '*/15 * * * *'
+  workflow_dispatch:
 
 jobs:
   archive:
     runs-on: ubuntu-latest
     permissions:
-      contents: write     # Crucial pour que le robot puisse modifier le CSV
+      contents: write
     steps:
       - uses: actions/checkout@v4
       
@@ -17,20 +17,32 @@ jobs:
         with:
           node-version: '20'
 
-      - name: Installer les dépendances
+      - name: Installer les dépendances Node
         run: npm install axios
 
-      - name: Lancer l'extraction et l'archivage
+      - name: Lancer l'extraction (historique.csv)
         run: node archive_meteo.js
         env:
           NETATMO_CLIENT_ID: ${{ secrets.NETATMO_CLIENT_ID }}
           NETATMO_CLIENT_SECRET: ${{ secrets.NETATMO_CLIENT_SECRET }}
           NETATMO_REFRESH_TOKEN: ${{ secrets.NETATMO_REFRESH_TOKEN }}
 
+      # --- NOUVELLES ÉTAPES PYTHON ---
+      - name: Installer Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.9'
+
+      - name: Installer dépendances Python
+        run: pip install pandas pytz
+
+      - name: Lancer le traitement des stats (TN, TX, RR24)
+        run: python process_stats.py
+
       - name: Sauvegarder les données sur GitHub
         run: |
           git config --global user.name "GitHub Action Bot"
           git config --global user.email "action@github.com"
-          git add historique.csv
-          git commit -m "Auto-update : Varanges & Genlis [skip ci]" || echo "Rien à ajouter"
+          git add historique.csv stats_stations.csv
+          git commit -m "Auto-update : Données et Stats [skip ci]" || echo "Rien à ajouter"
           git push
