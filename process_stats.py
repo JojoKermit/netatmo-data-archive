@@ -10,7 +10,7 @@ def process():
         return
 
     # Lecture avec séparateur point-virgule
-    df = pd.read_csv(file_path, sep=';', decimal='.')
+    df = pd.read_csv(file_path, sep=';', decimal='.', encoding='utf-8-sig')
     
     # Temps UTC (source du fichier)
     df['dt_utc'] = pd.to_datetime(df['date'] + ' ' + df['heure'], dayfirst=True)
