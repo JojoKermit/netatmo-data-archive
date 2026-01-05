@@ -74,7 +74,7 @@ def process():
     final_df = final_df.sort_values(['sort_date', 'nom station'], ascending=[False, True]).drop(columns=['sort_date'])
     
     # Sauvegarde au format CSV (séparateur ; pour compatibilité Excel FR)
-    final_df.to_csv(output_path, index=False, sep=';', encoding='utf-8')
+    final_df.to_csv(output_path, index=False, sep=',', encoding='utf-8')
     print(f"Succès ! Le fichier {output_path} a été mis à jour.")
 
 if __name__ == "__main__":
