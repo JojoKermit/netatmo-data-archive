@@ -73,8 +73,14 @@ async function archiverDonnees() {
             }
         });
 
-    } catch (error) {
-        console.error("❌ Erreur :", error.message);
+ } catch (error) {
+    if (error.response && error.response.status === 403) {
+        console.error("❌ Erreur 403 : Accès refusé par Netatmo (Rate limit probable).");
+        // On quitte proprement sans code d'erreur 1 pour ne pas recevoir de mail d'alerte
+        process.exit(0); 
+    } else {
+        console.error("❌ Erreur critique :", error.message);
+        // Pour toute autre erreur (réseau, syntaxe), on veut être prévenu
         process.exit(1);
     }
 }

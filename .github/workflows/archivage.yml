@@ -1,7 +1,8 @@
 name: Archivage Données Netatmo
 on:
   schedule:
-    - cron: '*/15 * * * *'
+    # Se lance toutes les 20 minutes à la minute 7 (07, 27, 47)
+    - cron: '7 */20 * * *'
   workflow_dispatch:
 
 jobs:
