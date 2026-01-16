@@ -30,7 +30,7 @@ async function archiverDonnees() {
 
         const toutesLesStations = res.data.body || [];
         
-        // 3. Formatage de la date en UTC (Identique au Raspberry Pi)
+        // 3. Formatage de la date en UTC
         const now = new Date();
         const dateUTC = now.toISOString().split('T')[0].split('-').reverse().join('/'); // JJ/MM/AAAA
         const heureUTC = now.toISOString().split('T')[1].substring(0, 5); // HH:mm
@@ -42,11 +42,9 @@ async function archiverDonnees() {
                 let temp = "N/A", hum = "N/A", pluie_1h = 0, pluie_24h = 0;
                 const measures = dataStation.measures || {};
 
-                // Extraction robuste des mesures (Temp, Hum, Pluie)
                 for (const key in measures) {
                     const m = measures[key];
 
-                    // Température et Humidité
                     if (m.type && m.res) {
                         const resKey = Object.keys(m.res)[0];
                         const values = m.res[resKey];
@@ -58,14 +56,11 @@ async function archiverDonnees() {
                         });
                     }
 
-                    // Pluie (Valeurs arrondies à 2 décimales)
                     if (m.rain_60min !== undefined) pluie_1h = Math.round(m.rain_60min * 100) / 100;
                     if (m.rain_24h !== undefined) pluie_24h = Math.round(m.rain_24h * 100) / 100;
                 }
 
-                // Format final : date;heure;ville;temp;hum;pluie1h;pluie24h
                 const ligne = `${dateUTC};${heureUTC};${cible.nom};${temp};${hum};${pluie_1h};${pluie_24h}\n`;
-                
                 fs.appendFileSync('historique.csv', ligne);
                 console.log(`✅ ${cible.nom} archivé à ${heureUTC} UTC (${temp}°C)`);
             } else {
@@ -73,16 +68,15 @@ async function archiverDonnees() {
             }
         });
 
- } catch (error) {
-    if (error.response && error.response.status === 403) {
-        console.error("❌ Erreur 403 : Accès refusé par Netatmo (Rate limit probable).");
-        // On quitte proprement sans code d'erreur 1 pour ne pas recevoir de mail d'alerte
-        process.exit(0); 
-    } else {
-        console.error("❌ Erreur critique :", error.message);
-        // Pour toute autre erreur (réseau, syntaxe), on veut être prévenu
-        process.exit(1);
+    } catch (error) {
+        if (error.response && error.response.status === 403) {
+            console.error("❌ Erreur 403 : Accès refusé par Netatmo (Rate limit probable).");
+            process.exit(0); 
+        } else {
+            console.error("❌ Erreur critique :", error.message);
+            process.exit(1);
+        }
     }
-}
+} // <--- C'est cette accolade qui devait manquer
 
 archiverDonnees();
