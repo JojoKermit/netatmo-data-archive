@@ -6,7 +6,7 @@ async function archiverDonnees() {
         { id: "70:ee:50:a9:7c:b0", nom: "Varanges" },
         { id: "70:ee:50:71:3d:00", nom: "Genlis" }
     ];
-    
+
     try {
         // 1. Authentification
         const authParams = new URLSearchParams({
@@ -29,7 +29,7 @@ async function archiverDonnees() {
         });
 
         const toutesLesStations = res.data.body || [];
-        
+
         // 3. Formatage de la date en UTC
         const now = new Date();
         const dateUTC = now.toISOString().split('T')[0].split('-').reverse().join('/'); // JJ/MM/AAAA
@@ -71,7 +71,7 @@ async function archiverDonnees() {
     } catch (error) {
         if (error.response && error.response.status === 403) {
             console.error("❌ Erreur 403 : Accès refusé par Netatmo (Rate limit probable).");
-            process.exit(0); 
+            process.exit(0);
         } else {
             console.error("❌ Erreur critique :", error.message);
             process.exit(1);
