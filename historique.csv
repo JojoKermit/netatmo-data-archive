@@ -1928,3 +1928,5 @@ date;heure;ville;temperature;humidite;pluie_1h;pluie_24h
 01/02/2026;23:58;Genlis;5.7;95;0;0
 02/02/2026;03:15;Varanges;5.8;98;0;0
 02/02/2026;03:15;Genlis;5.7;96;0;0.1
+02/02/2026;05:11;Varanges;4.5;99;0.1;0.1
+02/02/2026;05:11;Genlis;5;96;0;0.1
