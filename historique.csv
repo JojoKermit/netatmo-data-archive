@@ -3104,3 +3104,5 @@ date;heure;ville;temperature;humidite;pluie_1h;pluie_24h
 01/03/2026;03:20;Genlis;3.3;96;0;0
 01/03/2026;05:05;Varanges;3.8;98;0;0
 01/03/2026;05:05;Genlis;4.1;96;0;0.1
+01/03/2026;06:02;Varanges;4.1;98;0.1;0.1
+01/03/2026;06:02;Genlis;4.3;96;0;0.1
