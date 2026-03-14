@@ -22,8 +22,8 @@ async function archiverDonnees() {
         // 2. Récupération des données (Zone Varanges/Genlis)
         const res = await axios.get('https://api.netatmo.com/api/getpublicdata', {
             params: {
-                lat_ne: 47.30, lon_ne: 5.30,
-                lat_sw: 47.15, lon_sw: 5.10
+                lat_ne: 47.50, lon_ne: 5.50,
+                lat_sw: 47.00, lon_sw: 5.00
             },
             headers: { 'Authorization': `Bearer ${token}` }
         });
