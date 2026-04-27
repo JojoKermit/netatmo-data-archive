@@ -4,7 +4,11 @@ const fs = require('fs');
 async function archiverDonnees() {
     const STATIONS = [
         { id: "70:ee:50:a9:7c:b0", nom: "Varanges" },
-        { id: "70:ee:50:71:3d:00", nom: "Genlis" }
+        {
+            id: "70:ee:50:71:3d:00", // Genlis 1 (Principale)
+            nom: "Genlis",
+            secoursId: "70:ee:50:2b:56:da" // Genlis 2 (Secours)
+        }
     ];
 
     try {
@@ -19,7 +23,7 @@ async function archiverDonnees() {
         const authRes = await axios.post('https://api.netatmo.com/oauth2/token', authParams);
         const token = authRes.data.access_token;
 
-        // 2. Récupération des données (Zone Varanges/Genlis)
+        // 2. Récupération des données
         const res = await axios.get('https://api.netatmo.com/api/getpublicdata', {
             params: {
                 lat_ne: 47.50, lon_ne: 5.50,
@@ -32,11 +36,19 @@ async function archiverDonnees() {
 
         // 3. Formatage de la date en UTC
         const now = new Date();
-        const dateUTC = now.toISOString().split('T')[0].split('-').reverse().join('/'); // JJ/MM/AAAA
-        const heureUTC = now.toISOString().split('T')[1].substring(0, 5); // HH:mm
+        const dateUTC = now.toISOString().split('T')[0].split('-').reverse().join('/');
+        const heureUTC = now.toISOString().split('T')[1].substring(0, 5);
 
         STATIONS.forEach(cible => {
-            const dataStation = toutesLesStations.find(s => s._id === cible.id);
+            // Tentative de trouver la station principale
+            let dataStation = toutesLesStations.find(s => s._id === cible.id);
+            let utiliseSecours = false;
+
+            // Logique de repli : si absente, on cherche le secours
+            if (!dataStation && cible.secoursId) {
+                dataStation = toutesLesStations.find(s => s._id === cible.secoursId);
+                utiliseSecours = true;
+            }
 
             if (dataStation) {
                 let temp = "N/A", hum = "N/A", pluie_1h = 0, pluie_24h = 0;
@@ -44,27 +56,26 @@ async function archiverDonnees() {
 
                 for (const key in measures) {
                     const m = measures[key];
-
                     if (m.type && m.res) {
                         const resKey = Object.keys(m.res)[0];
                         const values = m.res[resKey];
-
                         m.type.forEach((typeStr, index) => {
                             const val = Array.isArray(values) ? values[index] : values;
                             if (typeStr === "temperature") temp = val;
                             if (typeStr === "humidity") hum = val;
                         });
                     }
-
                     if (m.rain_60min !== undefined) pluie_1h = Math.round(m.rain_60min * 100) / 100;
                     if (m.rain_24h !== undefined) pluie_24h = Math.round(m.rain_24h * 100) / 100;
                 }
 
                 const ligne = `${dateUTC};${heureUTC};${cible.nom};${temp};${hum};${pluie_1h};${pluie_24h}\n`;
                 fs.appendFileSync('historique.csv', ligne);
-                console.log(`✅ ${cible.nom} archivé à ${heureUTC} UTC (${temp}°C)`);
+
+                const statut = utiliseSecours ? " (via SECOURS)" : "";
+                console.log(`✅ ${cible.nom}${statut} archivé à ${heureUTC} UTC (${temp}°C)`);
             } else {
-                console.log(`⚠️ Station ${cible.nom} absente du flux public.`);
+                console.log(`⚠️ Station ${cible.nom} (et son secours) absente du flux public.`);
             }
         });
 
@@ -77,6 +88,6 @@ async function archiverDonnees() {
             process.exit(1);
         }
     }
-} // <--- C'est cette accolade qui devait manquer
+}
 
 archiverDonnees();
