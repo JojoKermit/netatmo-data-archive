@@ -35,7 +35,7 @@ async function archiverDonnees() {
 
         const toutesLesStations = res.data.body || [];
         // --- LIGNE DE TEST À AJOUTER ICI ---
-        console.log(`🔍 Stations trouvées dans la zone : ${toutesLesStations.map(s => s._id).join(', ')}`);
+        // console.log(`🔍 Stations trouvées dans la zone : ${toutesLesStations.map(s => s._id).join(', ')}`);
         // -----------------------------------
         // 3. Formatage de la date en UTC
         const now = new Date();
