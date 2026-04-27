@@ -5,9 +5,9 @@ async function archiverDonnees() {
     const STATIONS = [
         { id: "70:ee:50:a9:7c:b0", nom: "Varanges" },
         {
-            id: "70:ee:50:71:3d:00", // Genlis 1 (Principale)
+            id: "70:ee:50:71:3d:00",
             nom: "Genlis",
-            secoursId: "70:ee:50:2b:56:da" // Genlis 2 (Secours)
+            secoursId: "70:ee:50:2b:56:da" // On cible Genlis 2 (confirmée OK)
         }
     ];
 
@@ -26,8 +26,8 @@ async function archiverDonnees() {
         // 2. Récupération des données
         const res = await axios.get('https://api.netatmo.com/api/getpublicdata', {
             params: {
-                lat_ne: 47.60, lon_ne: 5.60,
-                lat_sw: 46.90, lon_sw: 4.90
+                lat_ne: 47.40, lon_ne: 5.30,
+                lat_sw: 47.10, lon_sw: 5.00
             },
             headers: { 'Authorization': `Bearer ${token}` }
         });
