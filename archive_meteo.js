@@ -1,3 +1,4 @@
+require('dotenv').config();
 const axios = require('axios');
 const fs = require('fs');
 
@@ -43,12 +44,12 @@ async function archiverDonnees() {
 
         STATIONS.forEach(cible => {
             // Tentative de trouver la station principale
-            let dataStation = toutesLesStations.find(s => s._id === cible.id);
+            let dataStation = toutesLesStations.find(s => s._id.trim() === cible.id.trim());
             let utiliseSecours = false;
 
             // Logique de repli : si absente, on cherche le secours
             if (!dataStation && cible.secoursId) {
-                dataStation = toutesLesStations.find(s => s._id === cible.secoursId);
+                dataStation = toutesLesStations.find(s => s._id.trim() === cible.secoursId.trim());
                 utiliseSecours = true;
             }
 
