@@ -26,14 +26,16 @@ async function archiverDonnees() {
         // 2. Récupération des données
         const res = await axios.get('https://api.netatmo.com/api/getpublicdata', {
             params: {
-                lat_ne: 47.50, lon_ne: 5.50,
-                lat_sw: 47.00, lon_sw: 5.00
+                lat_ne: 47.60, lon_ne: 5.60,
+                lat_sw: 46.90, lon_sw: 4.90
             },
             headers: { 'Authorization': `Bearer ${token}` }
         });
 
         const toutesLesStations = res.data.body || [];
-
+        // --- LIGNE DE TEST À AJOUTER ICI ---
+        console.log(`🔍 Stations trouvées dans la zone : ${toutesLesStations.map(s => s._id).join(', ')}`);
+        // -----------------------------------
         // 3. Formatage de la date en UTC
         const now = new Date();
         const dateUTC = now.toISOString().split('T')[0].split('-').reverse().join('/');
