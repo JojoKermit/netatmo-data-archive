@@ -1,0 +1,23 @@
+name: Diagnostic Netatmo Public
+
+on:
+  workflow_dispatch: # Permet de le lancer manuellement
+
+jobs:
+  check-netatmo:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Installer les dépendances
+        run: npm install axios dotenv
+
+      - name: Executer le Diagnostic
+        env:
+          NETATMO_CLIENT_ID: ${{ secrets.NETATMO_CLIENT_ID }}
+          NETATMO_CLIENT_SECRET: ${{ secrets.NETATMO_CLIENT_SECRET }}
+          NETATMO_REFRESH_TOKEN: ${{ secrets.NETATMO_REFRESH_TOKEN }}
+        run: node test_netatmo.js
