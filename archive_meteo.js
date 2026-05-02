@@ -1,4 +1,9 @@
-require('dotenv').config();
+// 1. On ne charge dotenv QUE si on est en local (PC ou Pi)
+// Sur GitHub, les secrets sont déjà dans process.env
+if (!process.env.GITHUB_ACTIONS) {
+    require('dotenv').config();
+}
+
 const axios = require('axios');
 const fs = require('fs');
 
@@ -8,12 +13,15 @@ async function archiverDonnees() {
         {
             id: "70:ee:50:71:3d:00",
             nom: "Genlis",
-            secoursId: "70:ee:50:2b:56:da" // On cible Genlis 2 (confirmée OK)
+            secoursId: "70:ee:50:2b:56:da" // Genlis 2 (confirmée OK)
         }
     ];
 
     try {
         // 1. Authentification
+        // Les variables process.env.NETATMO_... seront remplies :
+        // - Par le .env sur ton PC
+        // - Par les Secrets sur GitHub
         const authParams = new URLSearchParams({
             grant_type: 'refresh_token',
             client_id: process.env.NETATMO_CLIENT_ID,
@@ -24,7 +32,7 @@ async function archiverDonnees() {
         const authRes = await axios.post('https://api.netatmo.com/oauth2/token', authParams);
         const token = authRes.data.access_token;
 
-        // 2. Récupération des données
+        // 2. Récupération des données (Zone optimisée)
         const res = await axios.get('https://api.netatmo.com/api/getpublicdata', {
             params: {
                 lat_ne: 47.40, lon_ne: 5.30,
@@ -34,20 +42,15 @@ async function archiverDonnees() {
         });
 
         const toutesLesStations = res.data.body || [];
-        // --- LIGNE DE TEST À AJOUTER ICI ---
-        // console.log(`🔍 Stations trouvées dans la zone : ${toutesLesStations.map(s => s._id).join(', ')}`);
-        // -----------------------------------
-        // 3. Formatage de la date en UTC
+
         const now = new Date();
         const dateUTC = now.toISOString().split('T')[0].split('-').reverse().join('/');
         const heureUTC = now.toISOString().split('T')[1].substring(0, 5);
 
         STATIONS.forEach(cible => {
-            // Tentative de trouver la station principale
             let dataStation = toutesLesStations.find(s => s._id.trim() === cible.id.trim());
             let utiliseSecours = false;
 
-            // Logique de repli : si absente, on cherche le secours
             if (!dataStation && cible.secoursId) {
                 dataStation = toutesLesStations.find(s => s._id.trim() === cible.secoursId.trim());
                 utiliseSecours = true;
@@ -84,7 +87,7 @@ async function archiverDonnees() {
 
     } catch (error) {
         if (error.response && error.response.status === 403) {
-            console.error("❌ Erreur 403 : Accès refusé par Netatmo (Rate limit probable).");
+            console.error("❌ Erreur 403 : Accès refusé par Netatmo (Rate limit).");
             process.exit(0);
         } else {
             console.error("❌ Erreur critique :", error.message);
